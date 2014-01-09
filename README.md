@@ -93,4 +93,24 @@ Here is a configuration that has been proven to work with ADFS:
   }
 ```
 
+## Logout usage with Active Directory Federation Services (not tested yet)
+
+app.get('/logout', function(req, res){
+        if (!req.user.nameIDFormat)
+        {
+            // nameIDFormat assumed to be email address format
+            req.user.nameIDFormat = "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress";
+        }
+        req._passport.instance._strategies.saml.logout(req, function(err, logoutUrl) {
+            if (err) {
+                console.log("Unable to build saml logout request due to: "+err);
+            }
+            else {
+                console.log("Success on building logout request url="+JSON.stringify(logoutUrl));
+                req.logout(); // clear out user data before responding with redirect to adfs logout
+                res.redirect(logoutUrl); // redirect to landing page
+            }
+        });
+    });
+
 Please note that ADFS needs to have a trust established to your service in order for this to work.
